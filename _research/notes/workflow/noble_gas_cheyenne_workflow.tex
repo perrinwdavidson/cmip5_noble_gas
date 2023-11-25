@@ -1,0 +1,158 @@
+% ---------------------------------------------------------
+\documentclass[12pt]{article}
+
+% ---------------------------
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amstext}
+\usepackage{latexsym}
+\usepackage{cases}
+\usepackage{comment}
+\usepackage{hyperref}
+\usepackage{sectsty}
+\usepackage{titlesec}
+\usepackage[
+        backend=biber,
+        bibencoding=utf8,
+        maxbibnames=99,
+        maxcitenames=2,
+        uniquelist=false,
+        sorting=none,
+        style=nature,
+        giveninits=true,
+]{biblatex}
+\usepackage[
+        body={6.5in, 9.0in},
+        top=1.0in,
+        left=1.0in,
+        no head
+]{geometry}
+\usepackage{graphicx}
+\usepackage{dirtree}
+
+% ---------------------------
+\urlstyle{same}
+\hypersetup{
+    colorlinks=true,    % false: boxed links; true: colored links
+    linkcolor=blue,     % color of internal links
+    citecolor=blue,     % color of links to bibliography
+    filecolor=black,    % color of file links
+    urlcolor=blue       % color of external links
+}
+\setlength{\parindent}{5mm}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotesep 1.2em
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+\titlespacing{\section}{0pt}{\parskip}{-0.5em}
+\titlespacing{\subsection}{0pt}{\parskip}{-0.5em}
+\titlespacing{\subsubsection}{0pt}{\parskip}{-0.5em}
+
+% ---------------------------
+\AtEveryBibitem{\clearfield{number}}
+\addbibresource{bibfile.bib}
+
+% ---------------------------------------------------------
+\begin{document}
+
+% ---------------------------
+\parindent 0pt \parskip 1em
+\centerline{\large{\bf{Cheyenne Noble Gas Workflow}}}
+\vskip 1em
+\centerline{\sl{P.~W.~Davidson and A.~M.~Seltzer, MIT and WHOI}}
+\centerline{\sl{Fall 2023}}
+% \parskip 0em
+% \tableofcontents
+% \parskip 1em
+
+% ---------------------------
+\begin{center}
+	The general directory structure with relevant subdirectories listed for my \verb|Cheyenne| workflow is presented in the following trees. 
+\end{center}
+
+% ---------------------------
+\section*{Home Directory}
+
+The first is my \verb|home| directory, where the code and data for all experiments is stored:
+\medskip
+\dirtree{%
+.1 /glade/u/home/pdavidson.
+.2 matlab.
+.3 toolboxes.
+.4 gas-functions.  
+.4 gas-toolbox-withNGisotopes.  
+.4 tmm. 
+.5 tmm-general.
+.5 tmm-inertgasgasex-l13-xatm.
+.2 petsc-master.
+.2 tmm.
+.3 data.
+.4 default.
+.4 inertgasgasex-l13-xatm.
+.3 models.
+.4 default.
+.4 inertgasgasex-l13-xatm.
+.5 lgmdefault.
+.5 picdefault.
+.3 tmm.
+.4 models.
+.5 current.
+.6 inertgasgasex-l13-xatm.
+.6 inertgasgasex-n16.
+.6 inertgasgasex-s09.
+.2 startup-*.
+}
+Everything in this directory is called by the experiment scripts in the \verb|work| directory, with the most important script really being the \verb|make_input_files_for_inert_gas_with_gasex_model.m|. If you can run that, then the model will be all set to run.
+Of particular importance are: 
+\begin{itemize}
+	\item \verb|matlab/toolboxes/tmm-inertgasgasex-l13-xatm| toolbox which has all of the relevant scripts to run the Liang 2013 (L13) bubble model and processing the output data. I would just copy this into my experiment directory and add it to my \verb|MATLAB| path.
+	\item \verb|tmm/data/tmm-inertgasgasex-l13-xatm| data which includes all the relevant \verb|OceanCarbon| data files for forcing the L13 model.
+	\item \verb|tmm/models/tmm-inertgasgasex-l13-xatm| subdirectory which includes all of the TMM matrices and related data for both the PIC and the LGM. 
+	\item \verb|tmm/tmm| which is the TMM GitHub repository in which I have made three new subdirectories in \verb|tmm/tmm/models/current| which include the three parameterizations that we care about, namely L13 as well as Nicholson 2016 and Stanley 2009.
+\end{itemize}
+Some general comments:
+\begin{itemize}
+	\item There should be a file in almost every (sub)-directory of the form \verb|ABOUT.txt| that explains everything, from where I got the data to when I got it to how I modified it and when. If not, just shoot me an \href{mailto:perrinwd@mit.edu}{email} and I think I can pull up some more information locally that explains what I was thinking at the time\ldots
+	\item The \verb|startup_*| files can be run with \verb|source *| and those should load the appropriate modules that you need to run the model in \verb|Cheyenne| and process the data in \verb|Casper|.
+\end{itemize}
+
+You might note that with regard to your first point in your 24.11.2023 email, you cannot find the raw and simulated data from CMIP5 for the \verb|u10| velocity and the sea ice fraction \verb|sic| in this directory. 
+This is because we were not able to pull from the WHOI CMIP5 server to \verb|Cheyenne|.
+So, the data is stored at the following Google Drive link:
+\href{https://drive.google.com/drive/folders/1gnJkjWTys_jUcoiROkvcyBvVMBaEskNw?usp=sharing}{link}
+Be warned: this is a \emph{massive} directory. 
+Additionally, you can find the processing scripts in the following GitHub repository:
+\href{}{}.
+Within the code should be how I organized the data into \verb|.nc| files. 
+Let me know if I can help in understanding the code or how I organized the data.
+Everything should be mostly self-contained and commented appropriately, but you never know\ldots
+
+% ---------------------------
+\section*{Work Directory}
+The second is my \verb|work| directory where all experiments are performed:
+\medskip
+\dirtree{%
+.1 /glade/work/pdavidson.
+.2 cmip5.  
+.2 noble-gas.
+.2 noble-gas-new.
+.2 tmm.
+.3 experiments.
+.4 all-models.
+.5 circulation-change.
+.5 lgm-wind-extent.
+.5 lgm-wind-factor.
+.5 lgm-xatm.
+.5 pic-wind-freq.
+.5 pmip3-sic-u10-prelim.
+.4 inertgasgasex.
+.4 inertgasgasex-l13-xatm.
+.5 lgm-wind-perturbation.
+.6 runs.
+}
+
+
+\end{document}
+% ---------------------------------------------------------

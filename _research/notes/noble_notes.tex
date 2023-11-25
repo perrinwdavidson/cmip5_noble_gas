@@ -1,0 +1,350 @@
+% =========================================================
+% noble_notes
+% ---------------------------------------------------------
+% purpose :: to write up the work done on noble gas
+% date :: 18.01.2023
+% author :: perrin w. davidson
+% contact :: perrinwdavidson@gmail.com
+% =========================================================
+% ---------------------------------------------------------
+% set document class ::
+\documentclass[11pt]{article}
+
+% packages ::
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{physics}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{chemformula}
+\usepackage{bm}
+\usepackage{tablefootnote}
+
+% make commands ::
+\newcommand{\firstmoment}[1]{\langle#1\rangle}  % first moment (mean)
+\newcommand{\secondmoment}[2]{\langle#1#2\rangle}  % second moment (covariance)
+\newcommand{\Ndist}{\mathcal{N}}  % normal distribution
+\newcommand{\Sdens}{\textrm{S}}  % spectral density
+\newcommand{\degree}{$^\circ$}  % degree
+\newcommand{\R}{\mathbb{R}}  % real numbers
+\newcommand{\F}{\mathcal{F}}  % flux
+
+% theorem styles ::
+\newtheorem*{prop}{Proposition}
+
+% ---------------------------------------------------------
+% begin document ::
+\begin{document}
+
+% set title ::
+\title{Notes on Estimating Bias in Reconstructing Mean Ocean Temperature from Noble Gases}
+
+% information about authors ::
+\author{Perrin W. Davidson, Alan M. Seltzer, David P. Nicholson, \\ Samar Khatiwala, and Sarah Shackleton}
+
+% set date ::
+\date{\today}
+
+% make title ::
+\maketitle
+
+% ---------------------------------------------------------
+
+% ---------------------------
+\section*{Gas Exchange Parameterizations}
+
+We will consider three different parametrizations in this work. 
+Specifically, we consider models that have fluxes that have the functional form:
+\begin{equation}
+	\F_n = \F_d + \F_p + \F_c,
+	\label{eq:flux_diff_partial}
+\end{equation}
+where we define the subscripts as follows: $n$ as the net gas flux at the surface given initial conditions, $d$ as the exchange due to passive diffusion, $p$ as the partial dissolution of bubbles  (i.e., bubble over a certain radius that burst at the surface), and $c$ is complete dissolution of a bubble within the surface ocean.
+In our work, we additionally define a parameter $b$ that separate the fluxes due to bubbles (i.e., subscripts $p$ and  $d$) from exchange through passive diffusion.
+Therefore, we will be dealing with the functional form of fluxes:
+\begin{equation}
+	\F_n = \F_d + b\left(\F_p + \F_c\right).
+\end{equation}
+Additionally, we recognise the importance of sea ice in gas exchange.
+For this reason, we will use the sea ice fraction (sic or $f_{ice}$) as the proportion of the open ocean grid cell through which passive diffusion can occur, leading to the updated general gas exchange functional form as:
+\begin{equation}
+	\F_n = \left(1 - f_{ice}\right)\F_d + b\left(\F_p + \F_c\right).
+\end{equation}
+Recent research has also considered the fraction of gas exchange that occurs between sea ice and seawater, which gives the final gas exchange functional form as:
+\begin{equation}
+	\F_n = \left(1 + \left(k_{ice} - 1\right)f_{ice}\right)\F_d + b\left(\F_p + \F_c\right),
+\end{equation}
+where $k_{ice}$ is the diffusive percentage allowing gas exchange between sea ice and seawater.  
+We contrast this to a set of models in which there is a single flux term:
+\begin{equation}
+	\F_n = \F_d.
+	\label{eq:flux_diff_total}
+\end{equation}
+Modern gas exchange parametrizations use the magnitude of the wind speed at 10 [m] above sea level as the proxy for gas exchange.
+We define this wind speed as:
+\begin{equation}
+	\overline{u_{10}} = \sqrt{u_{10}^2 + v_{10}^2},
+	\label{eq:u10}
+\end{equation}
+where $\left(u, v\right)$ are the zonal and meridional winds at 10 [m], respectively. 
+We note that \eqref{eq:u10} is simply the discrete l-2 norm.
+Specifically, these parametrizations for diffusion are normally of the form (modified from Eq. (1) from \cite{jahne1987}):
+\begin{equation}
+	\F_d = \beta^{-1}\overline{u_{10}}^\gamma Sc^{-n},
+	\label{eq:flux_form}
+\end{equation}
+for $\beta^{-1}$ the coefficient modulating the magnitude of the flux, $\gamma$ the power law relationship with wind, $Sc$ the Schmidt number defined as the ratio between the kinematic viscosity and the gas diffusivity $Sc = \nu / D$, and $n$ the power law relationship between gas exchange the Schmidt number (the molecular transport properties of the fluid).
+The $n$ exponent ranges from  $1 / 2$ to  $1$ (from surface renewal to film models), is related to the shape of the turbulence decrease toward the interface, and is assumed to be $n = 1 / 2$ \cite {jahne1987}.
+A range of $\beta^{-1}$ and $\gamma$ are presented in Table \ref{tab:param_coeffs} for common parametrizations of diffusive gas exchange.
+\begin{table}[!t]
+	\centering
+	\begin{tabular}{cccc}
+		\textbf{Parameterization} & $\bm{\beta^{-1}}$ & $\bm{\gamma}$ & \textbf{Flux Type} \\
+		\midrule
+		Wanninkhof (1992) & $3.7 \times 10^{-1}$ & 2 & Eq. \eqref{eq:flux_diff_total}\\
+		Sweeney \textit{et al.} (2007) & $2.7 \times 10^{-1}$ & 2 & Eq. \eqref{eq:flux_diff_total} \\
+		Stanley \textit{et al.} (2009) &  $8.3 \times 10^{-7}$ & 2 & Eq. \eqref{eq:flux_diff_partial} \\
+		Liang \textit{et al.} (2013) & $\mathcal{O}\left(10^{-6}\right)$\tablefootnote{We note that this is approximate as this parametrization is dependent on site-specific characteristics.} & 1 & Eq. \eqref{eq:flux_diff_partial} \\
+	\end{tabular}
+	\caption{Gas exchange coefficients for common diffusive gas exchange parametrizations considered in this work, from the function form presented in Eq. \eqref{eq:flux_form}.}
+	\label{tab:param_coeffs}
+\end{table}
+We note that it is common to relate diffusive fluxes of gases to \ch{CO2}, as many of the original gas exchange studies were interested in determining the role of the air-sea interface in the fluxes of $p\ch{CO_2}$. 
+In order to easily transform these, we note that, assuming a constant $\beta$, $\gamma$, and $n$ between two gases, we can relate gas $a$ to gas $b$ via:
+\begin{align}
+	\frac{k_a}{k_b} &= \left(\frac{Sc_a}{Sc_b}\right)^{-n} \\	
+			&\Rightarrow k_a = k_b \left(\frac{Sc_a}{Sc_b}\right)^{-n}.
+\end{align}
+\par
+We discuss common parametrizations and our formulations of them below, which include the following variables:
+\begin{align*}
+	&P_{slp}\text{: pressure at the sea surface} \\
+	&C_d\text{: draft coefficient} \\
+	&\rho_a\text{: density of air} \\
+	&\rho_w\text{: density of seawater} \\
+	&660\text{: Schmidt number of \ch{CO2}} \\
+	&P_w\text{: water vapour pressure} \\
+	&P_{wsat}\text{: saturated water vapour pressure} \\
+	&P_{ref}\text{: standard reference atmospheric pressure (1 [atm])}
+\end{align*}
+
+% ---------------------------
+\subsection*{Liang 2013 (L13)}
+
+This parametrization is presented in \cite{liang2013}. 
+The model equations are --- for a single gas with concentration $C$, solubility $S$, Schmidt number $Sc$, and atmospheric mole fraction $\chi_{atm}$ so as to make the equations easier to read --- as follows:
+\begin{align}
+	\F_d &= \left(\frac{\sqrt{\rho_a C_d / \rho_w} \overline{u_{10}}}{r_{wt} + \alpha_{lc} r_a}\right)\left(S\chi_{atm}P_{atm}\right)\left(\frac{P_{slp}}{P_{atm}} - \frac{C}{S\chi_{atm}P_{atm}}\right),\\
+	\F_p &= \left(1.98\times 10^6 \left(\sqrt{\rho_a C_d / \rho_w} \overline{u_{10}}\right)^{2.76}\left(\frac{Sc}{660}\right)^{2 / 3}\right)\left(S\chi_{atm}P_{atm}\right) \\ &\quad\quad\quad\quad \times \left(\left(1 + 152.44 \left(\sqrt{\rho_a C_d / \rho_w} \overline{u_{10}}\right)^{1.06}\right)\frac{P_{slp}}{P_{atm}} - \frac{C}{S\chi_{atm}P_{atm}}\right),\\
+	\F_c &= \chi_{atm}5.56\left(\sqrt{\rho_a C_d / \rho_w} \overline{u_{10}}\right)^{3.86}.
+\end{align}
+We calculate the drag coefficient, $C_d$, as:
+\begin{equation}
+	C_d = \begin{cases}
+		0.0012 & \text{if } \overline{u_{10}} \le 11 \text{ [m s}^{-1}\text{]} \\
+		\left(0.49 + 0.0065\overline{u_{10}}\right)\times 10^{-3} & \text{if } 11 < \overline{u_{10}} \le 20 \text{ [m s}^{-1}\text{]} \\
+		0.0018 & \text{if } 20 < \overline{u_{10}} \text{ [m s}^{-1}\text{]} \\
+	      \end{cases}	
+\end{equation}
+Furthermore, from \cite{fairall2011}, we define the following coefficients present in the parametrization above:
+\begin{align}
+	\left(\text{Water-side resistance to transfer}\right) \: r_{wt} &= \left( \frac{\rho_w}{\rho_a}\right)^{1 / 2}\left(\frac{13.3}{1.3} Sc_w^{1 / 2} + 0.4^{-1}\log\left[\frac{0.5}{0.01}\right]\right), \\
+	\left(\text{Air-side resistance to transfer}\right) \: r_{at} &= \left(13.3Sc_a^{1 / 2} + C_d^{-1 / 2} - 5 \frac{\log\left[Sc_a\right]}{2\cdot 0.4}\right), \\
+	\left(\text{Ideal gas Pressure at interface}\right)\: \alpha_{lc} &= S\chi_{atm}P_{atm}RT.
+\end{align} 
+Here, $Sc_a$ and  $Sc_w$ are the Schmidt numbers for air and water, respectively.
+We note that for $b=0$, this is the COAREG3.1 \cite{fairall2011}, which has a linear relationship with $\overline{u_{10}}$ winds.
+
+% ---------------------------
+\subsection*{Stanley 2009 (S09)}
+
+This parametrization is presented in \cite{stanley2009}.
+The model equations are --- for a single gas with concentration $C$, solubility $S$, diffusivity $D$, Bunsen solubility coefficient $\alpha$, Schmidt number $Sc$, and atmospheric mole fraction $\chi_{atm}$ so as to make the equations easier to read --- as follows:
+\begin{align}
+	\F_d &= \left(0.97 \pm 0.14 \right)\left(8.6 \times 10^{-7}\right)\left(\frac{Sc}{660}\right)^{-0.5}\overline{u_{10}}^{2}\left(S\chi_{atm}P_{atm} - C\right), \\
+	\F_p &= \left(\left[2.3 \pm 1.5\right] \times 10^{-3} \right)\left(\overline{u_{10}} - 2.27\right)^{3} \alpha D^{2 / 3} \frac{\chi_{atm} P_{atm}}{RT} \\ &\quad\quad\quad\quad \times \left(1 + \frac{\rho g \left(0.15\overline{u_{10}} - 0.55\right)}{P_{atm}} - \frac{C}{S\chi_{atm}P_{atm}} \right), \\
+	\F_c &= \left(\left[9.1 \pm 1.3\right]\times 10^{-11}\right)\left(\overline{u_{10}}-2.27\right)^3 \frac{\chi_{atm}P_{atm}}{RT},
+\end{align}
+where $\pm \sigma$ is one standard deviation of the empirically determined constants.
+We note that for $b=0$, we have a model that is similar to \cite{wanninkhof1992} or \cite{sweeney2007}, which is a quadratic with $\overline{u_{10}}$.
+
+% ---------------------------
+\subsection*{Nicholson 2016 (N16)}
+
+This parametrization is presented in \cite{nicholson2016}.
+The model equations are --- for a single gas with concentration $C$, solubility $S$, diffusivity $D$, and atmospheric mole fraction $\chi_{atm}$ so as to make the equations easier to read --- as follows:
+\begin{align}
+	\F_d &= k\left(S\chi_{atm}P_{atm}\left( \frac{P_{slp} - P_w}{P_{ref} - P_{wsat}}\right) - C\right), \\
+	\F_p &= \left(\overline{u_{10}} - 2.27\right)^3\chi_{atm}\frac{P_{slp}}{P_{ref}}\left(1.06 \times 10^{-9}\right), \\
+	\F_c &= \left(\overline{u_{10}} - 2.27\right)^3\chi_{atm} \frac{P_{slp}}{P_{ref}} \left(2.19 \times 10^{-6}\right)D^{1 / 2}S.
+\end{align}
+Here, $k$ is defined as in \cite{sweeney2007}, or of the form:
+\begin{equation}
+	k = 0.27 \overline{u_{10}}^2.
+\end{equation}
+
+% ---------------------------
+\section*{Interglacial Gas Exchange Metric}
+
+In our work, we defined two terms, $\Delta R_{i,j}^k$ and $\Sigma_{i,j}$, which allowed us to explore saturation anamolies between the Last Glacial Maximum (LGM) and the Pre-Industrial Control (PIC) and were predicated on the following proposition:
+\begin{prop}[Pressure-Independent Interglacial Change Parameter, $\Sigma$]
+	The interglacial change parameter:
+	\begin{equation*}
+		\Sigma_{i,j} = \Delta R_{i,j}^{LGM} - \Delta R_{i,j}^{PIC},
+	\end{equation*}
+	where:
+	\begin{equation*}
+	    \Delta R_{i,j}^k = \frac{C_i^kC_{j, eq}^k}{Cj^kC_{i,eq}^k} - 1,
+    	\end{equation*}
+	with $i, j$ denoting noble gases at an age $k$, is pressure independent.
+	\begin{proof}
+		We know from the Ideal Gas Law that:
+		\begin{equation*}
+			P = N \left( \frac{RT}{V} \right) = N \cdot \text{const},
+		\end{equation*}
+		and thus pressure is an \emph{extensive} property of the gases. We get from this \emph{Dalton's Law of Partial Pressures} for gases $i$ in a volume $V$ with pressure total $P$:
+		\begin{equation*}
+			P = \sum_i p_i.
+		\end{equation*}
+		Now, we note that we can apply for a single gas $i$ Dalton's Law and the Ideal Gas Law to get:
+		\begin{equation*}
+			\frac{p_i}{P} = \frac{n_i}{N} = \chi_i,
+		\end{equation*}
+		where we have noted that this ratio is simply the mole fraction of the gas $i$ in the volume $V$. Thus, we get that:
+		\begin{equation*}
+			p_i = \chi_i P.
+		\end{equation*}
+		Next, we recall \emph{Henry's Law}, which states a concentration of a gas $C_i$ at equilibrium is given by:
+		\begin{equation*}
+			C_{i, eq} = K_H^ip_i = K_H^i\chi_iP.
+		\end{equation*}
+		From this, we note, for two gases $i, j$:
+		\begin{equation*}
+			\frac{C_{i, eq}}{C_{j, eq}} = \frac{K_H^i\chi_i}{K_H^j\chi_j}.
+		\end{equation*}
+		Therefore, we can write:
+		\begin{equation*}
+                	\Delta R_{i,j}^k = \frac{C_i^kK_H^j\chi_j^k}{Cj^kK_H^j\chi_j^k} - 1,
+	        \end{equation*}
+		which implies that both $\Delta R_{i,j}^k$ and $\Sigma_{i,j}$ are independent on total pressure, $P$.
+		Taking the definition of these parameters as in the proposition, we can see then that we do not need to make any assumptions of atmospheric pressure changes between the LGM and the PIC as they do not come into our definitions of these parameters.
+	\end{proof}
+\end{prop}
+Now, we will be using this parameter to determine the change in saturation states in the ocean between the LGM and the PIC
+
+% ---------------------------------------------------------
+% bibliography ::
+\bibliographystyle{unsrt}
+\bibliography{noble_notes_bib}
+
+% end document ::
+\end{document}
+
+% =========================================================
+% Previous notes ------------------------------------------
+% (18.01.23) ::
+% ---------------------------------------------------------
+% winds ::
+\section{Windspeed}
+
+Perhaps the most important parameterization that we will consider in our sensitivity studies is that of windspeed, 
+specifically $\overline{u_{10}}$, which we define as:
+\begin{equation*}
+	\overline{u_{10}} = \sqrt{u_{10}^2 + v_{10}^2},
+\end{equation*}
+which we note is simply the discrete L-2 norm.
+The models that we will consider are the entire range of the Paleoclimiate Model Intercomparison Project 3 (PMIP3), which is part of the Coupled Model Intercomparison Project 5 (CMIP5).
+Specifically, the models are as follows:
+\begin{enumerate}
+	\item NCARa
+	\item MRI
+	\item LASG-CESS
+	\item IPSL
+	\item MPI-M
+	\item CNRM-CERFACS
+	\item MIROC
+	\item (UVic)
+\end{enumerate}
+where we note that the parentheses around UVic are to denote that it is \emph{not} a member of PMIP3, but we make the list complete of all models tested.
+We then ran a set of perturbation experiments over the UVic windspeed, for both the Pre-Industrial Control (PIC) and the Last Glacial Maximum (LGM).
+These perturbation experiments consisted of:
+\begin{enumerate}
+	\item A complete extent domain of the entire global where a scalar multiplication was applied,
+	\item A domain that consisted of just the high latitudes were scalar multiplied, specifically greater than 50\degree.
+\end{enumerate}
+The purpose of this experiment was to ensure that it was indeed just the high latitude regions that lead to deep water formation. 
+We saw that this was the case. [INCLUDE PLOT HERE].
+To gain a general understanding of what the result of these perturbations were, we calculated a volume-weighted mean of each $\Delta$. [INCLUDE PLOT]
+We then saw that there was a general trend to our data. From here, we were able to apply a simple 2-box model to get a general, quantitative understanding of how these changes allow for changes in MOT and a bias. [INCLUDE IN-DEPTH DESCRIPTION].
+We then calculated the volume-weighted mean of all model presented above for latitudes greater than 50\degree and in the deep water formation months (the winter months when it is windiest).
+From here, we were able to estimate $\Sigma$ and then also the bias, based on our sensitivities discussed previously.
+
+% ---------------------------------------------------------
+% sea ice fraction ::
+\section{Sea Ice Fraction and Extent}
+
+An important part of our work also includes the sea ice extent and the sea ice fraction, denoted as \path{sic}/SIC.
+In order to see how this changes, we propose interpolating from a range of CMIP5/PMIP3 models SIC to the UVic grid. 
+We will use the optimal estimation program \path{DIVAnd} to do this. 
+We first ran an initial pass on the two important parameters, \path{epsilon2} and \path{len}. We then ran a cross validation. 
+From this, we then determined the optimal parameters based on the CV and the results are plotted in Fig. 
+We note that some of these models use curvilinear coordinates. To go around this, we average all duplicates. 
+
+% ---------------------------------------------------------
+% ice permeability ::
+\section{Ice Permeability}
+
+\begin{table}[thb]
+	\centering
+	\begin{tabular}{cccc}
+		\textbf{Variable} & \textbf{*.F Code} & \textbf{*.c Code}  & \textbf{Runscript} \\
+		\midrule
+		$k_{ice}$ & -- & \path{iceFractionScaleFac} & \path{-ice_fraction_scale_fac}\\
+		$f_{ice}^\ast$ & \path{ficeloc} & \path{localfice} & --\\
+		$K_s$ & \path{Vgas} & -- & -- \\
+		$\mathcal{F}_C^{gas}$ & \path{Finj} & -- & --\\
+	\end{tabular}
+	\caption{Significant variables that have differing names between theory and code.}
+\end{table}
+
+We are interested now in the parameter sensitivities for the gas transfer velocity parameter, $k_{ice}$.
+To do this, we currently set the runtime parameter \path{-ice_fraction_scale_fac}.
+Right now, we have set this as a constant scalar that linearly modifies all gas transfer across all grid cells.
+Of course, if the sea ice fraction is 0, then this scalar does not have an effect. \par
+
+Specifically, after specifying \path{-ice_fraction_scale_fac} in \path{runscript_*}, we can see that in \path{external_forcing_inert_gas.c}, this scalar value ($k_{ice}$) is applied to all sea ice fraction ($f_{ice}$) values for every grid cell following:
+\begin{equation*}
+	f_{ice}^\ast = k_{ice}f_{ice}.
+\end{equation*}
+We note that $f_{ice}^\ast$ is used in subroutine \path{inert_gas_fluxes.F}.
+In this work, we are using the model from \cite{Liang2013}. 
+In this subroutine, we have that $f_{ice}^\ast$ modifies three variables:
+\begin{align*}
+	K_s &= (1 - f_{ice}^\ast) \frac{u_\ast}{r_{wt}}, \\  
+	K_b &= (1 - f_{ice}^\ast)1.98\times10^6u_\ast^{2.76}, \\
+	\mathcal{F}_C^{gas} &= (1 - f_{ice^\ast})\chi_{atm}^{gas}5.56u_\ast^{3.86}.
+\end{align*}
+For full details, see \cite{Liang2013}, but we can clearly see that this updated parameter affects:
+\begin{itemize}
+	\item $K_s$: The gas transfer rate through the ocean surface (diffusion)
+	\item $K_b$: The gas transfer rate through large bubbles (partial dissolution)
+	\item $F_C^{gas}$: The gas flux through small bubbles that completely dissolve (complete dissolution)
+\end{itemize}
+Now, we are interested in varying this value of $k_{ice}$, but for what extents? The obvious choice would be something like:
+\begin{equation*}
+	k_{ice} \in [0, 0.2, 0.4, 0.6, 0.8, 1] \quad \text{such that} \quad f_{ice}^\ast \in [0, 1].
+\end{equation*}
+An interesting point that was brought up today by Roo was that we could also change the \emph{order} of $k_{ice}$ and it's effect on the effective piston velocity at each point.
+This is to say that we could pursue some sort of fitting to data of a functional form of the type:
+\begin{equation*}
+	\mathcal{K} = f_{ice}k_{ice}^n + (1 - f_{ice})k_{water}^m,
+\end{equation*}
+where we have the orders $n, m \in \R_+$ but realistically something in the domain $(0, 5)$ or something. 
+This form presents each $k$ as a piston velocity, which is different than how we are approaching the use of $k$ in our model now (as a pereability modifier on sea ice).
+We could start by looking at \cite{Loose2014} as a starting point, but I would like to note that their model deals with more than we are interested in (including shear, turbulence, etc.). 
+

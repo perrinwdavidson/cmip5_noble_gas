@@ -1,0 +1,33 @@
+===========================================================
+sensitivity studies for cmip5/pmip3 data
+===========================================================
+* we will be using a few sets of sensitivity studies, based on the ice extent and permeability of sea ice
+* to do this, we will use the interpolated grid of the pmip3 data sic (this is 7 models) to the uvic model grid
+* therefore, we have monthly grids of objectively interpolated sic. 
+* next, we want to test the permeability of the ice on the experiment, so we want to move from 1 (rigid lid) : 0.05 : 0.5 (semi-permeable)
+* do we want to run a 3D grid of data inputs of the form: [wind, sic, permeability]?
+	- how do we want to parameterize the wind?
+		+ greater than 50 deg Lat
+		+ greater than 50 deg Lat and also only in times of deep water formuation (winter)
+		+ PDFs of wind in the areas of interest (spatio temporal) and then run over these values (10 discretized or smthn)
+			* what do these look like? over the entire region (area weighted)? or per grid cell that we then just grab the nth sd/var from each pdf across all models?
+* get rid of x_atm in the scripts with no lgm modification. 
+* run just the pmip3 data interpolated sic in the uvic
+* email samar about gas exchange modulation coefficient
+* email roo about pdf generation of pmip3 data
+* single bubble model pilot data for nasa finesst
+	* single bubble deposited in depth radius and 
+* email tristan about nasa finesst
+
+* nasa finesst: https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={EA8742DF-E6E6-67E9-4D56-267EF31C1CDB}&path=open
+* what is the exact runtime parameter for gas piston ice injection permeability
+* change x_atm from/to:
+	N2: 780840
+	Ne: 18.180000
+	Ar: 9303.0136
+	Kr: 1.1414136
+	Xe: 0.08731494
+* other scholarships:
+	[1] John S. Hennessy Fellowship 2022-2023
+	[2] William Asbjornsen Albert Memorial Fellowship 2022-2023
+* apply to grc
